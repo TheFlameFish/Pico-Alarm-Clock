@@ -1,73 +1,24 @@
-import socket
-import network
+from microdot.microdot import Microdot, Request, Response
+from microdot.utemplate import Template
 import asyncio
+import sys
 
 import config
 
-addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
+# Note: for some reason it heckin' dies if you try to connect over https, so don't do that.
 
-sock = socket.socket()
-sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-sock.bind(addr)
-sock.listen(5)
+app = Microdot()
+Response.default_content_type = "text/html"
 
-async def get_document(name: str):
-    try:
-        with open(f"/site/{name}", "r") as file:
-            return file.read()
-        
-    except Exception as e:
-        print(f"WARN: Failed to open file {name}.\n{e}")
-        return f"Error: File not found: {name}"
+@app.get('/')
+async def index(request : Request):
+    alarm_time = f"{config.data['alarm'][0]}:{config.data['alarm'][1]}" if (config.data["alarm"] is not None) else None
+    if alarm_time is not None and len(alarm_time) < 5:
+        alarm_time = "0" + alarm_time # Add leading zero
+   
+    alarm_set = alarm_time is not None
 
-def http_response_bytes(body: bytes, status="200 OK", content_type="text/html"):
-    headers = [
-        f"HTTP/1.1 {status}",
-        "Server: PicoW",
-        f"Content-Length: {len(body)}",
-        f"Content-Type: {content_type}",
-        "Connection: close",
-        "",
-        ""
-    ]
-    header_bytes = "\r\n".join(headers).encode()
-    return header_bytes + body
+    return Template('index.html').render(alarm_time, alarm_set)
 
-def http_response(body: str, status="200 OK", content_type="text/html"):
-    body_bytes = body.encode("utf-8")
-    return http_response_bytes(body_bytes, status, content_type)
-
-async def run_server():
-    print("Listening on:", addr)
-    sock.setblocking(False)
-
-    while True:
-        try:
-            client, client_addr, = sock.accept()
-            print("Client connected from", client_addr)
-            request = client.recv(1024)
-            print(request)
-
-            request = str(request)
-
-            if request.find("/test") == 6:
-                print("User went to test path")
-
-            # print(config.data)
-            body = await get_document("index.html") % (config.data["alarm"] or "not set")
-            try:
-                client.send(http_response(body))
-            except Exception as e:
-                print(f"SEND FAILED: {e}")
-            client.close()
-        except OSError as e:
-            try:
-                if client: # Keeps giving error EAGAIN, but seems to work.
-                    client.close() 
-                    # print("Connection closed. Error: ",e)
-                    client = None
-            except NameError:
-                pass
-
-        await asyncio.sleep(0)
-            
+async def run():
+    await app.start_server(host='0.0.0.0', port=80)

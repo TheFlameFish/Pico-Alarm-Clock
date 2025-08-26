@@ -154,8 +154,11 @@ async def main():
     # loop
     asyncio.create_task(update_display(rtc))
     asyncio.create_task(alarm())
-    asyncio.create_task(webserver.run_server())
+    server = asyncio.create_task(webserver.run())
+    # asyncio.create_task(webserver.run_server())
     asyncio.create_task(startup_beep())
+
+    # await server
 
 loop = asyncio.get_event_loop()
 loop.create_task(main())

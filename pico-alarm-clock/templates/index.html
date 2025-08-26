@@ -1,0 +1,18 @@
+{% args alarm_time, alarm_set %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Alarm Clock</title>
+    </head>
+    <body>
+        <h3>Alarm</h3>
+        <p>Alarm currently set for: {{alarm_time}}</p>
+        <form action="/api/set-alarm" method="post">
+            <label for="alarm_time_set">Alarm Time:</label>
+            <input type="time" id="alarm_time_set" name="alarm_time_set" value="{{alarm_time}}" required>
+            <label for="alarm_enabled">Alarm Enabled</label>
+            <input type="checkbox" id="alarm_enabled" name="alarm_enabled" checked="{{alarm_set}}">
+            <input type="submit" value="Save">
+        </form>
+    </body>
+</html>
