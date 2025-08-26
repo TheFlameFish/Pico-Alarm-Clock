@@ -4,6 +4,12 @@
         <title>Alarm Clock</title>
     </head>
     <body>
+        <h3>Alarm</h3>
         <p>Alarm currently set for: %s</p>
+        <form action="/api/set-alarm" method="post">
+            <label for="alarm_time">Alarm Time:</label>
+            <input type="time" id="alarm_time" name="alarm_time">
+            <input type="submit" value="Save">
+        </form>
     </body>
 </html>
