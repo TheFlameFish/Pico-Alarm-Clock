@@ -1,5 +1,5 @@
 import utime
-from machine import SoftI2C, Pin, RTC
+from machine import SoftI2C, Pin, RTC, PWM
 import network
 import urequests
 import asyncio
@@ -20,6 +20,9 @@ LCD_ROWS = 2
 LCD_COLS = 16
 lcd_i2c = SoftI2C(sda=Pin(0), scl=Pin(1), freq=400000) # For some reason it dies if I try to use normal I2C :p
 lcd = I2cLcd(lcd_i2c, LCD_ADDR, LCD_ROWS, LCD_COLS)
+
+# Buzzer setup
+buzzer = PWM(Pin(16))
 
 def connect_wifi():
     hostname = "placeholderalarm" # TODO This'll be smth you can adjust in config
