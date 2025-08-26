@@ -100,11 +100,10 @@ async def update_display(rtc : RTC):
 async def alarm():
     global alarm_screaming
     while True:
-        print("Alarm tick")
         alarm_hr, alarm_min = (None, None)
 
-        if config.data["alarm"] != None:
-            alarm_hr, alarm_min = config.data["alarm"][0], config.data["alarm"][1]
+        if config._data["alarm"] != None:
+            alarm_hr, alarm_min = config._data["alarm"][0], config._data["alarm"][1]
         
         time = rtc.datetime()
         if time[4] == alarm_hr and time[5] == alarm_min and time[6] <= 3:

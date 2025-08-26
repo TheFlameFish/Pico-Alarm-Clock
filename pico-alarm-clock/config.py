@@ -7,27 +7,37 @@ DEFAULT_CONFIG = {
     "alarm": None,
 }
 
-data = {}
+_data = {}
 
 def read_config():
-    global data
+    global _data
     try:
         with open(CONFIG_PATH, "r") as f:
-            data : dict = json.load(f)
+            _data : dict = json.load(f)
 
         for key in DEFAULT_CONFIG.keys():
-            if not key in data.keys():
-                data[key] = DEFAULT_CONFIG[key]
+            if not key in _data.keys():
+                _data[key] = DEFAULT_CONFIG[key]
                 print(f"Config previously missing {key}. Added as default.")
     except Exception as e:
         print("WARN: Failed to open config.\n", e)
-        data = DEFAULT_CONFIG
+        _data = DEFAULT_CONFIG
 
     write_config()
     
 def write_config():
     with open(CONFIG_PATH, "w") as f:
-        f.write(json.dumps(data))
+        f.write(json.dumps(_data))
+
+def get(key, default = None):
+    return _data.get(key, default)
+
+def set(key, value):
+    if key not in _data.keys():
+        raise ValueError(f"Invalid config key: {key}")
+    
+    _data[key] = value
+    write_config()
 
 read_config()
-print(data)
+print(_data)
