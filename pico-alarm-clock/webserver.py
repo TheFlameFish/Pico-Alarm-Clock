@@ -7,8 +7,9 @@ import config
 addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
 
 sock = socket.socket()
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 sock.bind(addr)
-sock.listen(1)
+sock.listen(5)
 
 async def get_document(name: str):
     try:
