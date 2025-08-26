@@ -119,26 +119,25 @@ async def alarm():
 
         await asyncio.sleep(60 - rtc.datetime()[6] + 1) # Added second to make sure time is past the minute mark
 
+    
 async def sound_alarm():
     print("Alarm go brrrrrrr")
     pattern = (
-        ([(0.5,0.5)] * 8) # 8 long beeps
-        + (([(0.1,0.1)] * 3 + [(0.1, 0.5)]) * 4) # 32 short beeps in groups of 4
+        ([(500, 500)] * 8)  # 8 long beeps
+        + (([(150, 100)] * 3 + [(150, 500)]) * 4)  # 16 short beeps in groups of 4
     )
-    
-    i = 0
-    while alarm_screaming:
-        if len(pattern) > 1:
-            times = pattern[i % (len(pattern)-1)]
-        else:
-            times = pattern[0]
-        buzzer.duty_u16(BUZZER_DUTY_CYCLE)
-        buzzer.freq(ALARM_BUZZ_FREQ)
-        await asyncio.sleep(times[0])
 
-        buzzer.duty_u16(0)
-        await asyncio.sleep(times[1])
-        i += 1
+    while alarm_screaming:
+        for on_time, off_time in pattern:
+            if not alarm_screaming:
+                break
+            buzzer.duty_u16(BUZZER_DUTY_CYCLE)
+            buzzer.freq(ALARM_BUZZ_FREQ)
+            await asyncio.sleep_ms(on_time)
+
+            buzzer.duty_u16(0)
+            await asyncio.sleep_ms(off_time)
+
 
 async def startup_beep():
     buzzer.duty_u16(BUZZER_DUTY_CYCLE)
