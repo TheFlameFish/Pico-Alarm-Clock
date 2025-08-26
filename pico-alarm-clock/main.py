@@ -3,6 +3,7 @@ from machine import SoftI2C, Pin, RTC, PWM
 import network
 import urequests
 import asyncio
+import _thread
 
 from lib.lcd_api import LcdApi
 from lib.pico_i2c_lcd import I2cLcd
@@ -31,6 +32,8 @@ buzzer = PWM(Pin(16))
 # Button setup
 button = Pin(22, Pin.IN, Pin.PULL_UP)
 alarm_screaming = False
+
+scream_thread_running = False
 
 def connect_wifi():
     hostname = "placeholderalarm" # TODO This'll be smth you can adjust in config
@@ -109,7 +112,9 @@ async def alarm():
         if time[4] == alarm_hr and time[5] == alarm_min and time[6] <= 3:
             print("BEEEP")
             alarm_screaming = True
-            asyncio.create_task(sound_alarm())
+
+            if not scream_thread_running:
+                _thread.start_new_thread(sound_alarm, ())
 
             while button.value() == 1: # While button is unpressed
                 await asyncio.sleep(0)
@@ -120,24 +125,27 @@ async def alarm():
         await asyncio.sleep(60 - rtc.datetime()[6] + 1) # Added second to make sure time is past the minute mark
 
     
-async def sound_alarm():
-    print("Alarm go brrrrrrr")
-    pattern = (
-        ([(500, 500)] * 8)  # 8 long beeps
-        + (([(150, 100)] * 3 + [(150, 500)]) * 4)  # 16 short beeps in groups of 4
-    )
+def sound_alarm():
+    scream_thread_running = True
+    try:
+        print("Alarm go brrrrrrr")
+        pattern = (
+            ([(500, 500)] * 8)  # 8 long beeps
+            + (([(150, 100)] * 3 + [(150, 500)]) * 4)  # 16 short beeps in groups of 4
+        )
 
-    while alarm_screaming:
-        for on_time, off_time in pattern:
-            if not alarm_screaming:
-                break
-            buzzer.duty_u16(BUZZER_DUTY_CYCLE)
-            buzzer.freq(ALARM_BUZZ_FREQ)
-            await asyncio.sleep_ms(on_time)
+        while alarm_screaming:
+            for on_time, off_time in pattern:
+                if not alarm_screaming:
+                    break
+                buzzer.duty_u16(BUZZER_DUTY_CYCLE)
+                buzzer.freq(ALARM_BUZZ_FREQ)
+                utime.sleep_ms(on_time)
 
-            buzzer.duty_u16(0)
-            await asyncio.sleep_ms(off_time)
-
+                buzzer.duty_u16(0)
+                utime.sleep_ms(off_time)
+    finally: # Just in case it somehow dies, we still register the core as available.
+        scream_thread_running = False
 
 async def startup_beep():
     buzzer.duty_u16(BUZZER_DUTY_CYCLE)
