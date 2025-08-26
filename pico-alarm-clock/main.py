@@ -9,6 +9,7 @@ from lib.pico_i2c_lcd import I2cLcd
 
 import env
 import webserver
+import config
 
 print("Hai wurld :3")
 
