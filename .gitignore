@@ -1,1 +1,4 @@
 env.json
+*.env
+.venv
+external/run.sh
