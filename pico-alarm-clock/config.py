@@ -5,6 +5,7 @@ CONFIG_PATH = "config.json"
 
 DEFAULT_CONFIG = {
     "alarm": None,
+    "hostname": "picoalarm",
 }
 
 _data = {}

@@ -36,7 +36,7 @@ alarm_screaming = False
 scream_thread_running = False
 
 def connect_wifi():
-    hostname = "placeholderalarm" # TODO This'll be smth you can adjust in config
+    hostname = config.get("hostname")
     network.hostname(hostname)
 
     wlan = network.WLAN(network.STA_IF)

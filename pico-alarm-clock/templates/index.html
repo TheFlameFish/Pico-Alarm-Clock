@@ -1,18 +1,56 @@
-{% args alarm_time, alarm_set %}
+{% args alarm_time, alarm_set, hostname %}
 <!DOCTYPE html>
 <html>
     <head>
         <title>Alarm Clock</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     </head>
     <body>
         <h3>Alarm</h3>
         <p>Alarm currently set for: {{alarm_time}}</p>
-        <form action="/api/set-alarm" method="post">
+
+        <form class="refreshForm" action="/api/set-alarm" method="POST">
             <label for="alarm_time_set">Alarm Time:</label>
             <input type="time" id="alarm_time_set" name="alarm_time_set" value="{{alarm_time}}" required>
             <label for="alarm_enabled">Alarm Enabled</label>
-            <input type="checkbox" id="alarm_enabled" name="alarm_enabled" checked="{{alarm_set}}">
+            <input type="checkbox" id="alarm_enabled" name="alarm_enabled" {% if alarm_set %}checked{% endif %}>
             <input type="submit" value="Save">
         </form>
+
+        <h3>Server</h3>
+        
+        <form class="refreshForm" action="/api/set-hostname" method="POST">
+            <label for="hostname">Hostname:</label>
+            <input 
+                type="text" 
+                name="hostname"
+                id="hostname" 
+                value="{{hostname}}" 
+                required 
+                pattern="^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$" 
+            />
+            <input type="submit" value="Save">
+            <p>A restart is required before this can take effect.</p>
+        </form>
+
+        <form class="refreshForm" action="/api/reset" method="POST">
+            <input type="submit" value="Reboot">
+        </form>
+
+        <script>
+            $(".refreshForm").submit(function(e){
+                e.preventDefault();
+                var url = $(this).attr('action');
+                data = $(this).serialize();
+                $.ajax({
+                    url: url,
+                    type: $(this).attr("method"),
+                    data: data,
+                    success: function(){
+                        window.location.reload();
+                    }
+                })
+            })
+        </script>
     </body>
 </html>
