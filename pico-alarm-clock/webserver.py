@@ -6,6 +6,9 @@ import machine
 
 import config
 
+# I hate this word.
+alarm_stop_queued = False 
+
 # Note: for some reason it heckin' dies if you try to connect over https, so don't do that.
 
 app = Microdot()
@@ -31,8 +34,10 @@ async def index(request : Request):
    
     alarm_set = alarm_time is not None
     hostname = config.get("hostname")
+    snooze_minutes = config.get("snooze_minutes")
+    snooze_enabled = config.get("snooze_enabled")
 
-    return Template('index.html').render(alarm_time, alarm_set, hostname)
+    return Template('index.html').render(alarm_time, alarm_set, hostname, snooze_minutes, snooze_enabled)
 
 @app.post('/api/set-alarm')
 async def set_alarm(request : Request):
@@ -49,6 +54,15 @@ async def set_alarm(request : Request):
     config.set("alarm", alarm_time)
     stat = "Alarm set to " + str(config.get("alarm"))
 
+    config.set("snooze_enabled", request.form.get("snooze_enabled", False))
+    stat += f"\nSet snooze_toggle to {config.get('snooze_enabled')}."
+
+    snooze_time = request.form.get("snooze_time_set")
+    if snooze_time is not None and float(snooze_time) >= 1:
+        config.set("snooze_minutes", int(float(snooze_time)))
+        stat += f"\nSet snooze_minutes to {config.get('snooze_minutes')}."
+
+
     print(stat)
     return stat
 
@@ -64,6 +78,14 @@ async def set_hostname(request : Request):
 
     print(stat)
     return stat
+
+@app.post('/api/stop-alarm')
+async def stop_alarm(request : Request):
+    global alarm_stop_queued
+
+    alarm_stop_queued = True
+
+    return "Alarm stop queued"
 
 @app.route('/api/reset', ['GET', 'POST'])
 async def reset_route(request : Request):

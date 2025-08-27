@@ -6,6 +6,8 @@ CONFIG_PATH = "config.json"
 DEFAULT_CONFIG = {
     "alarm": None,
     "hostname": "picoalarm",
+    "snooze_minutes": 2,
+    "snooze_enabled": True,
 }
 
 _data = {}

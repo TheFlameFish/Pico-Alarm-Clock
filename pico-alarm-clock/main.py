@@ -35,6 +35,9 @@ alarm_screaming = False
 
 scream_thread_running = False
 
+# Snooze vars
+snooze_time : tuple | None = None
+
 def connect_wifi():
     hostname = config.get("hostname")
     network.hostname(hostname)
@@ -102,14 +105,20 @@ async def update_display(rtc : RTC):
 
 async def alarm():
     global alarm_screaming
+    global snooze_time
+
     while True:
         alarm_hr, alarm_min = (None, None)
+
+        if not config.get("snooze_enabled"):
+            snooze_time = None
+        snooze_hr, snooze_min = snooze_time or (None, None)
 
         if config._data["alarm"] != None:
             alarm_hr, alarm_min = config._data["alarm"][0], config._data["alarm"][1]
         
         time = rtc.datetime()
-        if time[4] == alarm_hr and time[5] == alarm_min and time[6] <= 3:
+        if ((time[4] == alarm_hr and time[5] == alarm_min) or (time[4] == snooze_hr and time[5] == snooze_min)) and time[6] <= 3:
             print("BEEEP")
             alarm_screaming = True
 
@@ -121,6 +130,18 @@ async def alarm():
 
             alarm_screaming = False
             print("Ok i eep now")
+
+            if config.get("snooze_enabled"):
+                time = rtc.datetime()
+
+                total_minutes = time[4] * 60 + time[5] + config.get("snooze_minutes")
+                snooze_hr = (total_minutes // 60) % 24
+                snooze_min = total_minutes % 60
+
+                snooze_time = (snooze_hr, snooze_min)
+                print(f"Snooze time: {snooze_hr:02}:{snooze_min:02}")
+            else:
+                snooze_time = None
 
         await asyncio.sleep(60 - rtc.datetime()[6] + 1) # Added second to make sure time is past the minute mark
 
@@ -153,6 +174,16 @@ async def startup_beep():
     await asyncio.sleep(0.1)
     buzzer.duty_u16(0)
 
+async def server_poller():
+    global snooze_time
+    while True:
+        if webserver.alarm_stop_queued:
+            snooze_time = None
+            webserver.alarm_stop_queued = False
+            print("Recieved queue to stop snooze.")
+        
+        await asyncio.sleep(1)
+
 async def main():
     connect_wifi()
     sync_time_api(rtc)
@@ -161,7 +192,7 @@ async def main():
     asyncio.create_task(update_display(rtc))
     asyncio.create_task(alarm())
     server = asyncio.create_task(webserver.run())
-    # asyncio.create_task(webserver.run_server())
+    asyncio.create_task(server_poller())
     asyncio.create_task(startup_beep())
 
     # await server

@@ -1,4 +1,4 @@
-{% args alarm_time, alarm_set, hostname %}
+{% args alarm_time, alarm_set, hostname, snooze_minutes, snooze_enabled %}
 <!DOCTYPE html>
 <html>
     <head>
@@ -9,11 +9,26 @@
         <h3>Alarm</h3>
         <p>Alarm currently set for: {{alarm_time}}</p>
 
-        <form class="refreshForm" action="/api/set-alarm" method="POST">
+        <form class="refreshForm" action="/api/set-alarm" method="POST" autocomplete="off">
             <label for="alarm_time_set">Alarm Time:</label>
             <input type="time" id="alarm_time_set" name="alarm_time_set" value="{{alarm_time}}" required>
             <label for="alarm_enabled">Alarm Enabled</label>
             <input type="checkbox" id="alarm_enabled" name="alarm_enabled" {% if alarm_set %}checked{% endif %}>
+            
+            <br><br>
+
+            <label for="snooze_time_set">Snooze Minutes:</label>
+            <input type="number" id="snooze_time_set" name="snooze_time_set" value="{{snooze_minutes}}">
+
+            <input
+                type="checkbox"
+                id="snooze_enabled"
+                name="snooze_enabled"
+                {% if snooze_enabled %}checked{% endif %}
+            />
+            <label for="snooze_enabled">Enable Snooze</label>
+
+            <br><br>
             <input type="submit" value="Save">
         </form>
 
