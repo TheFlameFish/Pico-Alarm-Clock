@@ -81,6 +81,7 @@ def sync_time_api(rtc: RTC):
 async def update_display(rtc : RTC):
     lcd.backlight_on()
     previous_time_str = ""
+    previous_alarm_str = ""
     pervious_date_str = ""
 
     while True:
@@ -89,10 +90,23 @@ async def update_display(rtc : RTC):
         time_str = f"{current_time[4]:02}:{current_time[5]:02}:{current_time[6]:02}"  # HH:MM:SS
         date_str = f"{current_time[2]:02}/{current_time[1]:02}/{current_time[0]}"  # DD/MM/YYYY
 
+        alarm_str = " " * len(previous_alarm_str) # If not set, clear
+        if config.get("alarm") == None:
+            pass
+        elif snooze_time != None:
+            alarm_str = "SNZ"
+        else:
+            alarm_str = "SET"
+
+
         # Don't refresh unnesecarily
         if time_str != previous_time_str:
             lcd.move_to(0, 0)
             lcd.putstr(time_str)
+
+        if alarm_str != previous_alarm_str:
+            lcd.move_to(LCD_COLS - len(alarm_str), 1)
+            lcd.putstr(alarm_str)
 
         if date_str != pervious_date_str:
             lcd.move_to(0, 1)
@@ -100,6 +114,7 @@ async def update_display(rtc : RTC):
 
         previous_time_str = time_str
         pervious_date_str = date_str
+        previous_alarm_str = alarm_str
 
         await asyncio.sleep(1) # It'd be rather silly to refresh this more than once per second (Read: Future me, don't do that.)
 
