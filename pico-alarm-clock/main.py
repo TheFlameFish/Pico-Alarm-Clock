@@ -162,6 +162,8 @@ async def alarm():
 
     
 def sound_alarm():
+    global scream_thread_running
+    
     scream_thread_running = True
     try:
         print("Alarm go brrrrrrr")
