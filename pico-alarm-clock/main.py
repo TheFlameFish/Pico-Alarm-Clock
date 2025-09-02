@@ -140,13 +140,16 @@ async def alarm():
             if not scream_thread_running:
                 _thread.start_new_thread(sound_alarm, ())
 
-            while button.value() == 1: # While button is unpressed
+
+            end_time = utime.time() + config.get("alarm_scream_duration")
+
+            while button.value() == 1 and utime.time() <= end_time: # While button is unpressed and the alarm hasn't been going for max secs
                 await asyncio.sleep(0)
 
             alarm_screaming = False
             print("Ok i eep now")
 
-            if config.get("snooze_enabled"):
+            if config.get("snooze_enabled") and utime.time() <= end_time:
                 time = rtc.datetime()
 
                 total_minutes = time[4] * 60 + time[5] + config.get("snooze_minutes")
