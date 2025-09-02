@@ -141,7 +141,7 @@ async def alarm():
                 _thread.start_new_thread(sound_alarm, ())
 
 
-            end_time = utime.time() + config.get("alarm_scream_duration")
+            end_time = utime.time() + config.get("alarm_scream_duration_secs")
 
             while button.value() == 1 and utime.time() <= end_time: # While button is unpressed and the alarm hasn't been going for max secs
                 await asyncio.sleep(0)
