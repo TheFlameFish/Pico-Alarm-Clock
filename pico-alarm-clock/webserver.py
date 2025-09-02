@@ -41,7 +41,7 @@ async def index(request : Request):
     return Template('index.html').render(alarm_time, alarm_set, hostname, snooze_minutes, snooze_enabled, scream_duration)
 
 @app.post('/api/set-alarm')
-async def set_alarm(request : Request):
+async def set_alarm(request : Request): # Bad and sucks but I'm eepy, this is a personal project, and it's an alarm clock. Idk TODO cleanup maybe
     print(request.form)
     if not request.form:
         return "Invalid request body", 400
@@ -63,8 +63,12 @@ async def set_alarm(request : Request):
         config.set("snooze_minutes", int(float(snooze_time)))
         stat += f"\nSet snooze_minutes to {config.get('snooze_minutes')}."
 
-    config.set("alarm_scream_timeout_secs", request.form.get("scream_duration_set", config.get("alarm_scream_timeout_secs")))
+    # try:
+    config.set("alarm_scream_timeout_secs", float(request.form.get("scream_duration_set", config.get("alarm_scream_timeout_secs"))))
     stat += f"\nSet alarm_scream_timeout_secs to {config.get('alarm_scream_timeout_secs')}."
+    # except Exception as e:
+    #     print("WARN: Missing or invalid val for alarm scream timeout.", e)
+    #     pass
 
     print(stat)
     return stat

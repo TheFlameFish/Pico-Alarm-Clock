@@ -144,6 +144,7 @@ async def alarm():
             end_time = utime.time() + config.get("alarm_scream_timeout_secs")
 
             while button.value() == 1 and utime.time() <= end_time: # While button is unpressed and the alarm hasn't been going for max secs
+                print(f"{utime.time()} <= {end_time}")
                 await asyncio.sleep(0)
 
             alarm_screaming = False
