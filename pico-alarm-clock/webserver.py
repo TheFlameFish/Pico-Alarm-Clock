@@ -36,8 +36,9 @@ async def index(request : Request):
     hostname = config.get("hostname")
     snooze_minutes = config.get("snooze_minutes")
     snooze_enabled = config.get("snooze_enabled")
+    scream_duration = config.get("alarm_scream_duration_secs")
 
-    return Template('index.html').render(alarm_time, alarm_set, hostname, snooze_minutes, snooze_enabled)
+    return Template('index.html').render(alarm_time, alarm_set, hostname, snooze_minutes, snooze_enabled, scream_duration)
 
 @app.post('/api/set-alarm')
 async def set_alarm(request : Request):
@@ -62,6 +63,8 @@ async def set_alarm(request : Request):
         config.set("snooze_minutes", int(float(snooze_time)))
         stat += f"\nSet snooze_minutes to {config.get('snooze_minutes')}."
 
+    config.set("alarm_scream_duration_secs", request.form.get("scream_duration_set", config.get("alarm_scream_duration_secs")))
+    stat += f"\nSet alarm_scream_duration_secs to {config.get('alarm_scream_duration_secs')}."
 
     print(stat)
     return stat

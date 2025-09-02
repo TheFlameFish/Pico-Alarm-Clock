@@ -1,4 +1,4 @@
-{% args alarm_time, alarm_set, hostname, snooze_minutes, snooze_enabled %}
+{% args alarm_time, alarm_set, hostname, snooze_minutes, snooze_enabled, scream_duration %}
 <!DOCTYPE html>
 <html>
     <head>
@@ -27,6 +27,11 @@
                 {% if snooze_enabled %}checked{% endif %}
             />
             <label for="snooze_enabled">Enable Snooze</label>
+
+            <br><br>
+
+            <label for="scream_duration_set">Alarm Timeout (seconds):</label>
+            <input type="number" id="scream_duration_set" name="scream_duration_set" value="{{scream_duration}}">
 
             <br><br>
             <input type="submit" value="Save">
