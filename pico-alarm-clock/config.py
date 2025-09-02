@@ -8,7 +8,7 @@ DEFAULT_CONFIG = {
     "hostname": "picoalarm",
     "snooze_minutes": 2,
     "snooze_enabled": True,
-    "alarm_scream_duration_secs": 5 * 60,
+    "alarm_scream_timeout_secs": 5 * 60,
 }
 
 _data = {}
